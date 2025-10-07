@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/elsaCzeyn/testpower4/src/menu" // Import avec le bon nom de module
+	"github.com/elsaCzeyn/power4-web/src/menu" // Import avec le bon nom de module
 )
 
 func main() {
