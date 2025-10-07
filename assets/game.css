@@ -1,0 +1,63 @@
+/* ========================================
+   STYLES POUR LA PAGE PUISSANCE 4
+   ======================================== */
+
+/* Style pour centrer tout le contenu de la page */
+body {
+    /* Centrage horizontal du texte */
+    text-align: center;
+    
+    /* Supprime les marges par défaut du navigateur */
+    margin: 0;
+    padding: 0;
+    
+    /* Police plus jolie */
+    font-family: Arial, sans-serif;
+    
+    /* Couleur de fond claire */
+    background-color: #c9c9c9;
+}
+
+/* Style spécifique pour le titre principal */
+h1 {
+    /* Centrage du titre (hérité du body, mais on peut le spécifier) */
+    text-align: center;
+    
+    /* Couleur du titre */
+    color: #2c3e50;
+    
+    /* Espacement autour du titre */
+    margin-top: 75px;
+    margin-bottom: 50px;
+    
+    /* Taille de police plus grande */
+    font-size: 2.5em;
+}
+
+/* Style pour le paragraphe explicatif */
+p {
+    /* Centrage du paragraphe */
+    text-align: center;
+    
+    /* Couleur plus douce */
+    color: #555;
+    
+    /* Espacement */
+    margin-bottom: 50px;
+    
+    /* Taille de police */
+    font-size: 1.2em;
+}
+
+table {
+    /* border-collapse: collapse; */    /* Commenté pour permettre border-radius */
+    margin: 0 auto;
+}
+td {
+    width: 100px;
+    height: 100px;
+    border: 2px solid rgb(255, 255, 255);
+    border-radius: 100px;
+    background-color: #000000;
+}
+

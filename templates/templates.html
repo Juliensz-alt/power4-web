@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<!-- Déclaration du type de document HTML5 -->
+<html lang="fr">
+<!-- Balise HTML principale avec la langue française -->
+
+<head>
+    <!-- Section HEAD : contient les métadonnées de la page -->
+    <meta charset="UTF-8">
+    <!-- Définit l'encodage des caractères pour afficher correctement les accents -->
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Permet à la page de s'adapter aux différentes tailles d'écran (responsive) -->
+
+    <title>Page d'accueil - Power4</title>
+    <!-- Titre qui apparaît dans l'onglet du navigateur -->
+    
+    <link rel="stylesheet" href="/assets/styles.css">
+    <!-- Lien vers le fichier CSS pour styler la page -->
+</head>
+
+<body>
+    <!-- Section BODY : contient tout le contenu visible de la page -->
+
+    <h1>Bienvenue sur Puissance 4, le jeu rempli de puissance  !</h1>
+    <!-- Titre principal de la page (H1 = plus gros titre) -->
+    
+    <p>Cliquez sur le bouton ci-dessous pour continuer :</p>
+    <!-- Paragraphe explicatif pour l'utilisateur -->
+    
+    <!-- BOUTON PRINCIPAL qui appelle votre fonction Go -->
+    <a href="/welcome">
+        <!-- 
+        Balise <a> = lien hypertexte
+        href="/welcome" = quand on clique, ça va vers l'URL "/welcome"
+        Cette URL correspond à la route définie dans main.go :
+        http.HandleFunc("/welcome", WelcomeHandler)
+        -->
+        
+        <button type="button">
+            <!-- 
+            Balise <button> = crée un bouton cliquable
+            type="button" = bouton simple (pas de soumission de formulaire)
+            -->
+            Suivant
+            <!-- Texte affiché sur le bouton -->
+        </button>
+    </a>
+    
+    <!-- EXPLICATION DU FONCTIONNEMENT : -->
+    <!-- 
+    1. L'utilisateur voit le bouton "Suivant"
+    2. Il clique dessus
+    3. Le navigateur fait une requête GET vers "/welcome"
+    4. Le serveur Go appelle WelcomeHandler()
+    5. WelcomeHandler() redirige vers "/next"
+    6. L'utilisateur arrive sur la page "/next"
+    -->
+    
+</body>
+</html>

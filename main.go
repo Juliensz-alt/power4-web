@@ -1,15 +1,15 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
+	"github.com/elsaCzeyn/testpower4/src/menu" // Import avec le bon nom de module
 )
 
 func main() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, "Bienvenue sur mon serveur Go !")
-	})
-
-	fmt.Println("Serveur démarré sur le port 8080...")
-	http.ListenAndServe(":8080", nil)
+	// Configuration de toutes les routes web
+	// Cette fonction relie tous les handlers entre eux
+	menu.SetupRoutes()
+	
+	// Démarrage du serveur web
+	// Cette fonction lance le serveur sur le port 8080
+	menu.StartServer()
 }

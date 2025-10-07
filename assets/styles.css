@@ -1,0 +1,79 @@
+/* ========================================
+   STYLES POUR LA PAGE PUISSANCE 4
+   ======================================== */
+
+/* Style pour centrer tout le contenu de la page */
+body {
+    /* Centrage horizontal du texte */
+    text-align: center;
+    
+    /* Supprime les marges par défaut du navigateur */
+    
+    
+    /* Police plus jolie */
+    font-family: Arial, sans-serif;
+    
+    /* Couleur de fond claire */
+    background-color: #4a7a9b;
+}
+
+/* Style spécifique pour le titre principal */
+h1 {
+    /* Centrage du titre (hérité du body, mais on peut le spécifier) */
+    text-align: center;
+    
+    /* Couleur du titre */
+    color: #2c3e50;
+    
+    /* Espacement autour du titre */
+    margin-top: 100px;
+    margin-bottom: 60px;
+    
+    /* Taille de police plus grande */
+    font-size: 2.5em;
+}
+
+/* Style pour le paragraphe explicatif */
+p {
+    /* Centrage du paragraphe */
+    text-align: center;
+    
+    /* Couleur plus douce */
+    color: #555;
+    
+    /* Espacement */
+    margin-bottom: 30px;
+    
+    /* Taille de police */
+    font-size: 1.2em;
+}
+
+/* Style pour le bouton */
+button {
+    /* Padding pour rendre le bouton plus gros */
+    padding: 15px 30px;
+    
+    /* Taille de police */
+    font-size: 1.1em;
+    
+    /* Couleur de fond */
+    background-color: #3498db;
+    
+    /* Couleur du texte */
+    color: white;
+    
+    /* Supprimer la bordure par défaut */
+    border: none;
+    
+    /* Coins arrondis */
+    border-radius: 8px;
+    
+    /* Curseur pointer au survol */
+    cursor: pointer;
+}
+
+/* Style au survol du bouton */
+button:hover {
+    /* Couleur plus foncée au survol */
+    background-color: #2980b9;
+} 
