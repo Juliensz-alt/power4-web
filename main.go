@@ -1,8 +1,6 @@
 package main
 
-import (
-	"github.com/elsaCzeyn/power4-web/src/menu" // Import avec le bon nom de module
-)
+import "power4/src/menu"
 
 func main() {
 	// Configuration de toutes les routes web
