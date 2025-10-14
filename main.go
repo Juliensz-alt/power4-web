@@ -1,13 +1,10 @@
 package main
 
-import "power4/src/menu"
+import (
+	"power4/src/menu"
+)
 
 func main() {
-	// Configuration de toutes les routes web
-	// Cette fonction relie tous les handlers entre eux
 	menu.SetupRoutes()
-	
-	// Démarrage du serveur web
-	// Cette fonction lance le serveur sur le port 8080
 	menu.StartServer()
 }
