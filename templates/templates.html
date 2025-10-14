@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Power4 Web - Jeu Puissance 4</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 Power4 Web</h1>
+            <p class="subtitle">Jeu Puissance 4 en ligne</p>
+        </header>
+
+        <main>
+            <!-- Informations du jeu -->
+            <div class="game-info">
+                <div class="current-player">
+                    <span class="label">Joueur actuel :</span>
+                    <span class="player-indicator player-{{.CurrentPlayer}}">
+                        Joueur {{.CurrentPlayer}}
+                    </span>
+                </div>
+                <div class="game-status">
+                    <span class="status-message">{{.Message}}</span>
+                </div>
+            </div>
+
+            <!-- Plateau de jeu -->
+            <div class="game-board">
+                <table class="board-table">
+                    {{range $row := .Board}}
+                    <tr>
+                        {{range $col := $row}}
+                        <td class="cell {{if eq $col 1}}player-1{{else if eq $col 2}}player-2{{end}}">
+                            {{if eq $col 1}}
+                                <div class="token player-1">●</div>
+                            {{else if eq $col 2}}
+                                <div class="token player-2">●</div>
+                            {{else}}
+                                <div class="token empty"></div>
+                            {{end}}
+                        </td>
+                        {{end}}
+                    </tr>
+                    {{end}}
+                </table>
+            </div>
+
+            <!-- Contrôles de jeu -->
+            <div class="game-controls">
+                <form action="/play" method="POST" class="column-selector">
+                    <div class="column-buttons">
+                        {{range $i := seq 1 7}}
+                        <button type="submit" name="column" value="{{$i}}" class="column-btn">
+                            {{$i}}
+                        </button>
+                        {{end}}
+                    </div>
+                </form>
+
+                <div class="action-buttons">
+                    <a href="/" class="btn btn-secondary">Actualiser</a>
+                    <form action="/reset" method="POST" style="display: inline;">
+                        <button type="submit" class="btn btn-primary">Nouvelle partie</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Informations des joueurs -->
+            <div class="players-info">
+                <div class="player-info player-1">
+                    <div class="player-token">●</div>
+                    <span>{{.Player1Name}}</span>
+                </div>
+                <div class="player-info player-2">
+                    <div class="player-token">●</div>
+                    <span>{{.Player2Name}}</span>
+                </div>
+            </div>
+
+            <!-- Statut de fin de jeu -->
+            {{if .GameOver}}
+            <div class="game-over">
+                {{if .Winner}}
+                <h2>🎉 Félicitations !</h2>
+                <p>Le <strong>Joueur {{.Winner}}</strong> a gagné !</p>
+                {{else}}
+                <h2>🤝 Match nul !</h2>
+                <p>La grille est pleine, personne n'a gagné.</p>
+                {{end}}
+            </div>
+            {{end}}
+        </main>
+
+        <footer>
+            <p>Power4 Web - Développé avec Go et HTML Templates</p>
+        </footer>
+    </div>
+
+    <script>
+
+        // Animation des boutons de colonne
+        document.querySelectorAll('.column-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 150);
+            });
+        });
+
+        // Mise en évidence de la colonne survolée
+        document.querySelectorAll('.column-btn').forEach(btn => {
+            btn.addEventListener('mouseenter', function() {
+                const column = parseInt(this.value) - 1;
+                const cells = document.querySelectorAll(`.board-table tr td:nth-child(${column + 1})`);
+                cells.forEach(cell => {
+                    cell.classList.add('highlight');
+                });
+            });
+
+            btn.addEventListener('mouseleave', function() {
+                const column = parseInt(this.value) - 1;
+                const cells = document.querySelectorAll(`.board-table tr td:nth-child(${column + 1})`);
+                cells.forEach(cell => {
+                    cell.classList.remove('highlight');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
