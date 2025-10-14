@@ -34,8 +34,8 @@ var game = &GameState{
 
 // SetupRoutes enregistre les handlers HTTP
 func SetupRoutes() {
-	// Serve the `assets` folder at /static/ so templates can request /static/styles.css
-	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./assets"))))
+	// Serve the `static` folder at /static/ so templates can request /static/styles.css
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 	http.HandleFunc("/", homeHandler)
 	http.HandleFunc("/play", playHandler)
 	http.HandleFunc("/reset", resetHandler)
