@@ -34,7 +34,8 @@ var game = &GameState{
 
 // SetupRoutes enregistre les handlers HTTP
 func SetupRoutes() {
-	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static/"))))
+	// Serve the `assets` folder at /static/ so templates can request /static/styles.css
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./assets"))))
 	http.HandleFunc("/", homeHandler)
 	http.HandleFunc("/play", playHandler)
 	http.HandleFunc("/reset", resetHandler)
@@ -45,7 +46,7 @@ func StartServer() {
 	// Lire le port depuis la variable d'environnement PORT (par défaut 3000)
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080"
+		port = "5000"
 	}
 
 	log.Printf("Serveur Power4 démarré sur http://localhost:%s", port)
@@ -162,7 +163,6 @@ func checkWin(row, col, player int) bool {
 	if count >= 4 {
 		return true
 	}
-
 	count = 1
 	for i := row - 1; i >= 0 && game.Board[i][col] == player; i-- {
 		count++
@@ -173,7 +173,6 @@ func checkWin(row, col, player int) bool {
 	if count >= 4 {
 		return true
 	}
-
 	count = 1
 	for i, j := row-1, col-1; i >= 0 && j >= 0 && game.Board[i][j] == player; i, j = i-1, j-1 {
 		count++
@@ -184,7 +183,6 @@ func checkWin(row, col, player int) bool {
 	if count >= 4 {
 		return true
 	}
-
 	count = 1
 	for i, j := row-1, col+1; i >= 0 && j < 7 && game.Board[i][j] == player; i, j = i-1, j+1 {
 		count++
@@ -192,10 +190,6 @@ func checkWin(row, col, player int) bool {
 	for i, j := row+1, col-1; i < 6 && j >= 0 && game.Board[i][j] == player; i, j = i+1, j-1 {
 		count++
 	}
-	if count >= 4 {
-		return true
-	}
-
 	return false
 }
 
