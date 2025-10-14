@@ -45,7 +45,7 @@ func StartServer() {
 	// Lire le port depuis la variable d'environnement PORT (par défaut 3000)
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "3000"
+		port = "8080"
 	}
 
 	log.Printf("Serveur Power4 démarré sur http://localhost:%s", port)
