@@ -15,6 +15,7 @@ type GameState struct {
 	Winner        int       `json:"winner"`
 	GameOver      bool      `json:"gameOver"`
 	Message       string    `json:"message"`
+	Started       bool      `json:"started"`
 }
 
 // GameData pour les templates
@@ -29,7 +30,8 @@ var game = &GameState{
 	CurrentPlayer: 1,
 	Winner:        0,
 	GameOver:      false,
-	Message:       "Joueur 1, choisissez une colonne !",
+	Message:       "Cliquez sur Jouer pour commencer !",
+	Started:       false,
 }
 
 // SetupRoutes enregistre les handlers HTTP
@@ -39,6 +41,8 @@ func SetupRoutes() {
 	http.HandleFunc("/", homeHandler)
 	http.HandleFunc("/play", playHandler)
 	http.HandleFunc("/reset", resetHandler)
+	http.HandleFunc("/start", startHandler)
+	http.HandleFunc("/quit", quitHandler)
 }
 
 // StartServer démarre le serveur HTTP
@@ -96,6 +100,12 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 func playHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Empêcher de jouer tant que la partie n'a pas démarré
+	if !game.Started {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
 
@@ -217,5 +227,45 @@ func resetGame() {
 	game.CurrentPlayer = 1
 	game.Winner = 0
 	game.GameOver = false
+	// On conserve l'état Started pour rester dans la partie si on réinitialise
+	if game.Started {
+		game.Message = "Joueur 1, choisissez une colonne !"
+	} else {
+		game.Message = "Cliquez sur Jouer pour commencer !"
+	}
+}
+
+// startHandler démarre une nouvelle partie et quitte le menu
+func startHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Activer le mode jeu et reset propre
+	game.Started = true
+	game.Board = [6][7]int{}
+	game.CurrentPlayer = 1
+	game.Winner = 0
+	game.GameOver = false
 	game.Message = "Joueur 1, choisissez une colonne !"
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+// quitHandler remet le jeu en mode menu (Started = false) et réinitialise l'état
+func quitHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
+		return
+	}
+
+	game.Started = false
+	game.Board = [6][7]int{}
+	game.CurrentPlayer = 1
+	game.Winner = 0
+	game.GameOver = false
+	game.Message = "Cliquez sur Jouer pour commencer !"
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }

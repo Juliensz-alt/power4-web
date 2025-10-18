@@ -14,8 +14,22 @@
         </header>
 
         <main>
+            <!-- Écran de menu avant le début de la partie -->
+            {{if not .Started}}
+            <section class="menu-screen">
+                <h2>Bienvenue dans Power4</h2>
+                <p class="menu-subtitle">Préparez-vous pour une partie de Puissance 4 !</p>
+
+                <form action="/start" method="POST" class="menu-actions">
+                    <button type="submit" class="btn btn-play">▶ Jouer</button>
+                </form>
+
+                <p class="menu-hint">Astuce: Cliquez sur une colonne (1 à 7) pour déposer un jeton.</p>
+            </section>
+            {{end}}
+
             <!-- Informations du jeu -->
-            <div class="game-info">
+            <div class="game-info {{if not .Started}}hidden{{end}}">
                 <div class="current-player">
                     <span class="label">Joueur actuel :</span>
                     <span class="player-indicator player-{{.CurrentPlayer}}">
@@ -28,7 +42,7 @@
             </div>
 
             <!-- Plateau de jeu -->
-            <div class="game-board">
+            <div class="game-board {{if not .Started}}hidden{{end}}">
                 <table class="board-table">
                     {{range $row := .Board}}
                     <tr>
@@ -49,7 +63,7 @@
             </div>
 
             <!-- Contrôles de jeu -->
-            <div class="game-controls">
+            <div class="game-controls {{if not .Started}}hidden{{end}}">
                 <form action="/play" method="POST" class="column-selector">
                     <div class="column-buttons">
                         {{range $i := seq 1 7}}
@@ -62,6 +76,9 @@
 
                 <div class="action-buttons">
                     <a href="/" class="btn btn-secondary">Actualiser</a>
+                    <form action="/quit" method="POST" style="display: inline;">
+                        <button type="submit" class="btn btn-secondary">Retour au menu</button>
+                    </form>
                     <form action="/reset" method="POST" style="display: inline;">
                         <button type="submit" class="btn btn-primary">Nouvelle partie</button>
                     </form>
@@ -69,7 +86,7 @@
             </div>
 
             <!-- Informations des joueurs -->
-            <div class="players-info">
+            <div class="players-info {{if not .Started}}hidden{{end}}">
                 <div class="player-info player-1">
                     <div class="player-token">●</div>
                     <span>{{.Player1Name}}</span>
@@ -81,7 +98,7 @@
             </div>
 
             <!-- Statut de fin de jeu -->
-            {{if .GameOver}}
+            {{if and .Started .GameOver}}
             <div class="game-over">
                 {{if .Winner}}
                 <h2>🎉 Félicitations !</h2>
