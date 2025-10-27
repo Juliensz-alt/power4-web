@@ -3,9 +3,11 @@ package menu
 import (
 	"html/template"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 )
 
 // GameState représente l'état du jeu
@@ -16,6 +18,7 @@ type GameState struct {
 	GameOver      bool      `json:"gameOver"`
 	Message       string    `json:"message"`
 	Started       bool      `json:"started"`
+	Mode          string    `json:"mode"` // "duo" or "bot"
 }
 
 // GameData pour les templates
@@ -32,6 +35,7 @@ var game = &GameState{
 	GameOver:      false,
 	Message:       "Cliquez sur Jouer pour commencer !",
 	Started:       false,
+	Mode:          "",
 }
 
 // SetupRoutes enregistre les handlers HTTP
@@ -46,6 +50,9 @@ func SetupRoutes() {
 	// Nouvelle routes: règles et page vide
 	http.HandleFunc("/rules", rulesHandler)
 	http.HandleFunc("/blank", blankHandler)
+	// Mode selection: duo or bot
+	http.HandleFunc("/game-mode", gameModeHandler)
+	http.HandleFunc("/start-bot", startBotHandler)
 }
 
 // StartServer démarre le serveur HTTP
@@ -55,6 +62,9 @@ func StartServer() {
 	if port == "" {
 		port = "5000"
 	}
+
+	// Initialiser le générateur aléatoire pour le bot
+	rand.Seed(time.Now().UnixNano())
 
 	log.Printf("Serveur Power4 démarré sur http://localhost:%s", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
@@ -207,6 +217,47 @@ func playHandler(w http.ResponseWriter, r *http.Request) {
 		game.Message = "Joueur " + strconv.Itoa(game.CurrentPlayer) + ", choisissez une colonne !"
 	}
 
+	// Si on est en mode bot et c'est au tour du bot (on suppose bot = joueur 2), jouer un coup aléatoire
+	if !game.GameOver && game.Mode == "bot" && game.CurrentPlayer == 2 {
+		// choisir une colonne aléatoire parmi celles qui ne sont pas pleines
+		available := make([]int, 0, 7)
+		for c := 0; c < 7; c++ {
+			if game.Board[0][c] == 0 {
+				available = append(available, c)
+			}
+		}
+		if len(available) > 0 {
+			// choisir un index aléatoire
+			c := available[rand.Intn(len(available))]
+			// déposer le jeton du bot
+			rIndex := -1
+			for i := 5; i >= 0; i-- {
+				if game.Board[i][c] == 0 {
+					rIndex = i
+					break
+				}
+			}
+			if rIndex != -1 {
+				game.Board[rIndex][c] = 2
+				if checkWin(rIndex, c, 2) {
+					game.Winner = 2
+					game.GameOver = true
+					game.Message = "Le bot a gagné !"
+				} else if isBoardFull() {
+					game.GameOver = true
+					game.Message = "🤝 Match nul ! La grille est pleine."
+				} else {
+					game.CurrentPlayer = 1
+					game.Message = "Joueur 1, choisissez une colonne !"
+				}
+			}
+		} else {
+			// plus de colonnes disponibles -> match nul
+			game.GameOver = true
+			game.Message = "🤝 Match nul ! La grille est pleine."
+		}
+	}
+
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
@@ -298,6 +349,9 @@ func startHandler(w http.ResponseWriter, r *http.Request) {
 	game.GameOver = false
 	game.Message = "Joueur 1, choisissez une colonne !"
 
+	// Par défaut le start normal est en duo
+	game.Mode = "duo"
+
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
@@ -314,6 +368,47 @@ func quitHandler(w http.ResponseWriter, r *http.Request) {
 	game.Winner = 0
 	game.GameOver = false
 	game.Message = "Cliquez sur Jouer pour commencer !"
+	game.Mode = ""
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+// gameModeHandler affiche la page qui permet de choisir Duo ou Bot
+func gameModeHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
+		return
+	}
+
+	tmpl, err := template.New("game_mode.html").ParseFiles("templates/game_mode.html")
+	if err != nil {
+		log.Printf("Erreur lors du parsing du template game_mode: %v", err)
+		http.Error(w, "Erreur serveur", http.StatusInternalServerError)
+		return
+	}
+
+	err = tmpl.Execute(w, nil)
+	if err != nil {
+		log.Printf("Erreur lors de l'exécution du template game_mode: %v", err)
+		http.Error(w, "Erreur serveur", http.StatusInternalServerError)
+		return
+	}
+}
+
+// startBotHandler démarre une partie contre le bot (bot = joueur 2)
+func startBotHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
+		return
+	}
+
+	game.Started = true
+	game.Board = [6][7]int{}
+	game.CurrentPlayer = 1
+	game.Winner = 0
+	game.GameOver = false
+	game.Message = "Joueur 1, choisissez une colonne !"
+	game.Mode = "bot"
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
