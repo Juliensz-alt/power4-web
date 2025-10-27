@@ -43,6 +43,9 @@ func SetupRoutes() {
 	http.HandleFunc("/reset", resetHandler)
 	http.HandleFunc("/start", startHandler)
 	http.HandleFunc("/quit", quitHandler)
+	// Nouvelle routes: règles et page vide
+	http.HandleFunc("/rules", rulesHandler)
+	http.HandleFunc("/blank", blankHandler)
 }
 
 // StartServer démarre le serveur HTTP
@@ -92,6 +95,51 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	err = tmpl.Execute(w, data)
 	if err != nil {
 		log.Printf("Erreur lors de l'exécution du template: %v", err)
+		http.Error(w, "Erreur serveur", http.StatusInternalServerError)
+		return
+	}
+}
+
+// rulesHandler affiche une page contenant les règles du jeu
+func rulesHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
+		return
+	}
+
+	tmpl, err := template.New("rules.html").ParseFiles("templates/rules.html")
+	if err != nil {
+		log.Printf("Erreur lors du parsing du template rules: %v", err)
+		http.Error(w, "Erreur serveur", http.StatusInternalServerError)
+		return
+	}
+
+	// On peut fournir quelques infos de jeu si nécessaire
+	err = tmpl.Execute(w, nil)
+	if err != nil {
+		log.Printf("Erreur lors de l'exécution du template rules: %v", err)
+		http.Error(w, "Erreur serveur", http.StatusInternalServerError)
+		return
+	}
+}
+
+// blankHandler affiche une page pour l'instant vide (placeholder)
+func blankHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
+		return
+	}
+
+	tmpl, err := template.New("blank.html").ParseFiles("templates/blank.html")
+	if err != nil {
+		log.Printf("Erreur lors du parsing du template blank: %v", err)
+		http.Error(w, "Erreur serveur", http.StatusInternalServerError)
+		return
+	}
+
+	err = tmpl.Execute(w, nil)
+	if err != nil {
+		log.Printf("Erreur lors de l'exécution du template blank: %v", err)
 		http.Error(w, "Erreur serveur", http.StatusInternalServerError)
 		return
 	}
