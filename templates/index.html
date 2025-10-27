@@ -29,7 +29,7 @@
                     <a href="/blank" class="btn btn-secondary">🔖 Page vide</a>
                 </div>
 
-                <p class="menu-hint">Astuce: Cliquez sur une colonne (1 à 7) pour déposer un jeton.</p>
+                <p class="menu-hint">Astuce : cliquez sur une case du plateau pour déposer un jeton.</p>
             </section>
             {{end}}
 
@@ -49,10 +49,11 @@
             <!-- Plateau de jeu -->
             <div class="game-board {{if not .Started}}hidden{{end}}">
                 <table class="board-table">
-                    {{range $row := .Board}}
+                    {{range $rowIndex, $row := .Board}}
                     <tr>
-                        {{range $col := $row}}
-                        <td class="cell {{if eq $col 1}}player-1{{else if eq $col 2}}player-2{{end}}">
+                        {{range $colIndex, $col := $row}}
+                        <td class="cell {{if eq $col 1}}player-1{{else if eq $col 2}}player-2{{end}}" 
+                            data-column="{{$colIndex}}">
                             {{if eq $col 1}}
                                 <div class="token player-1">●</div>
                             {{else if eq $col 2}}
@@ -67,27 +68,15 @@
                 </table>
             </div>
 
-            <!-- Contrôles de jeu -->
-            <div class="game-controls {{if not .Started}}hidden{{end}}">
-                <form action="/play" method="POST" class="column-selector">
-                    <div class="column-buttons">
-                        {{range $i := seq 1 7}}
-                        <button type="submit" name="column" value="{{$i}}" class="column-btn">
-                            {{$i}}
-                        </button>
-                        {{end}}
-                    </div>
+            <!-- Actions secondaires (sans boutons de colonnes) -->
+            <div class="action-buttons {{if not .Started}}hidden{{end}}">
+                <a href="/" class="btn btn-secondary">Actualiser</a>
+                <form action="/quit" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-secondary">Retour au menu</button>
                 </form>
-
-                <div class="action-buttons">
-                    <a href="/" class="btn btn-secondary">Actualiser</a>
-                    <form action="/quit" method="POST" style="display: inline;">
-                        <button type="submit" class="btn btn-secondary">Retour au menu</button>
-                    </form>
-                    <form action="/reset" method="POST" style="display: inline;">
-                        <button type="submit" class="btn btn-primary">Nouvelle partie</button>
-                    </form>
-                </div>
+                <form action="/reset" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-primary">Nouvelle partie</button>
+                </form>
             </div>
 
             <!-- Informations des joueurs -->
@@ -122,33 +111,39 @@
     </div>
 
     <script>
+        // Clique sur une cellule pour jouer dans la colonne correspondante
+        document.querySelectorAll('.board-table td').forEach(cell => {
+            cell.addEventListener('click', () => {
+                const column = cell.dataset.column;
+                if (!column) return;
 
-        // Animation des boutons de colonne
-        document.querySelectorAll('.column-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                this.style.transform = 'scale(0.95)';
-                setTimeout(() => {
-                    this.style.transform = 'scale(1)';
-                }, 150);
+                // Crée et envoie dynamiquement un formulaire POST à /play
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/play';
+
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'column';
+                input.value = parseInt(column) + 1; // colonnes 1 à 7
+                form.appendChild(input);
+
+                document.body.appendChild(form);
+                form.submit();
             });
         });
 
-        // Mise en évidence de la colonne survolée
-        document.querySelectorAll('.column-btn').forEach(btn => {
-            btn.addEventListener('mouseenter', function() {
-                const column = parseInt(this.value) - 1;
-                const cells = document.querySelectorAll(`.board-table tr td:nth-child(${column + 1})`);
-                cells.forEach(cell => {
-                    cell.classList.add('highlight');
-                });
+        // Effet de survol (highlight de la colonne)
+        document.querySelectorAll('.board-table td').forEach(cell => {
+            cell.addEventListener('mouseenter', () => {
+                const column = cell.dataset.column;
+                const cells = document.querySelectorAll(`.board-table tr td:nth-child(${parseInt(column) + 1})`);
+                cells.forEach(c => c.classList.add('highlight'));
             });
-
-            btn.addEventListener('mouseleave', function() {
-                const column = parseInt(this.value) - 1;
-                const cells = document.querySelectorAll(`.board-table tr td:nth-child(${column + 1})`);
-                cells.forEach(cell => {
-                    cell.classList.remove('highlight');
-                });
+            cell.addEventListener('mouseleave', () => {
+                const column = cell.dataset.column;
+                const cells = document.querySelectorAll(`.board-table tr td:nth-child(${parseInt(column) + 1})`);
+                cells.forEach(c => c.classList.remove('highlight'));
             });
         });
     </script>
