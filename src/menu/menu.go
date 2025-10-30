@@ -12,13 +12,16 @@ import (
 
 // GameState représente l'état du jeu
 type GameState struct {
-	Board         [6][7]int `json:"board"`
-	CurrentPlayer int       `json:"currentPlayer"`
-	Winner        int       `json:"winner"`
-	GameOver      bool      `json:"gameOver"`
-	Message       string    `json:"message"`
-	Started       bool      `json:"started"`
-	Mode          string    `json:"mode"` // "duo" or "bot"
+	Board         [][]int `json:"board"`
+	Rows          int     `json:"rows"`
+	Cols          int     `json:"cols"`
+	ConnectN      int     `json:"connectN"`
+	CurrentPlayer int     `json:"currentPlayer"`
+	Winner        int     `json:"winner"`
+	GameOver      bool    `json:"gameOver"`
+	Message       string  `json:"message"`
+	Started       bool    `json:"started"`
+	Mode          string  `json:"mode"` // "duo" or "bot"
 }
 
 // GameData pour les templates
@@ -26,10 +29,22 @@ type GameData struct {
 	GameState
 	Player1Name string
 	Player2Name string
+	CSSVersion  int64
+}
+
+func newBoard(rows, cols int) [][]int {
+	b := make([][]int, rows)
+	for i := range b {
+		b[i] = make([]int, cols)
+	}
+	return b
 }
 
 var game = &GameState{
-	Board:         [6][7]int{},
+	Rows:          6,
+	Cols:          7,
+	ConnectN:      4,
+	Board:         newBoard(6, 7),
 	CurrentPlayer: 1,
 	Winner:        0,
 	GameOver:      false,
@@ -37,6 +52,9 @@ var game = &GameState{
 	Started:       false,
 	Mode:          "",
 }
+
+// mutex pour protéger l'accès concurrent à game (pour le bot async)
+// (no mutex needed for synchronous bot updates)
 
 // SetupRoutes enregistre les handlers HTTP
 func SetupRoutes() {
@@ -50,9 +68,34 @@ func SetupRoutes() {
 	// Nouvelle routes: règles et page vide
 	http.HandleFunc("/rules", rulesHandler)
 	http.HandleFunc("/blank", blankHandler)
+	http.HandleFunc("/variant", variantHandler)
 	// Mode selection: duo or bot
 	http.HandleFunc("/game-mode", gameModeHandler)
 	http.HandleFunc("/start-bot", startBotHandler)
+}
+
+// variantHandler affiche la page qui permet de choisir la variante (4 ou 5)
+func variantHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
+		return
+	}
+
+	tmpl, err := template.New("variant.html").ParseFiles("templates/variant.html")
+	if err != nil {
+		log.Printf("Erreur lors du parsing du template variant: %v", err)
+		http.Error(w, "Erreur serveur", http.StatusInternalServerError)
+		return
+	}
+
+	data := struct{ CSSVersion int64 }{CSSVersion: time.Now().Unix()}
+
+	err = tmpl.Execute(w, data)
+	if err != nil {
+		log.Printf("Erreur lors de l'exécution du template variant: %v", err)
+		http.Error(w, "Erreur serveur", http.StatusInternalServerError)
+		return
+	}
 }
 
 // StartServer démarre le serveur HTTP
@@ -100,6 +143,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 		GameState:   *game,
 		Player1Name: "Joueur 1",
 		Player2Name: "Joueur 2",
+		CSSVersion:  time.Now().Unix(),
 	}
 
 	err = tmpl.Execute(w, data)
@@ -132,6 +176,7 @@ func rulesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
 
 // blankHandler affiche une page pour l'instant vide (placeholder)
 func blankHandler(w http.ResponseWriter, r *http.Request) {
@@ -175,7 +220,7 @@ func playHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	column, err := strconv.Atoi(columnStr)
-	if err != nil || column < 1 || column > 7 {
+	if err != nil || column < 1 || column > game.Cols {
 		game.Message = "Erreur: Colonne invalide"
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
@@ -190,7 +235,7 @@ func playHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	row := -1
-	for i := 5; i >= 0; i-- {
+	for i := game.Rows - 1; i >= 0; i-- {
 		if game.Board[i][columnIndex] == 0 {
 			row = i
 			break
@@ -203,35 +248,41 @@ func playHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Appliquer le coup du joueur
 	game.Board[row][columnIndex] = game.CurrentPlayer
 
 	if checkWin(row, columnIndex, game.CurrentPlayer) {
 		game.Winner = game.CurrentPlayer
 		game.GameOver = true
 		game.Message = "🎉 Félicitations ! Joueur " + strconv.Itoa(game.CurrentPlayer) + " a gagné !"
-	} else if isBoardFull() {
-		game.GameOver = true
-		game.Message = "🤝 Match nul ! La grille est pleine."
-	} else {
-		game.CurrentPlayer = 3 - game.CurrentPlayer
-		game.Message = "Joueur " + strconv.Itoa(game.CurrentPlayer) + ", choisissez une colonne !"
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
 	}
 
-	// Si on est en mode bot et c'est au tour du bot (on suppose bot = joueur 2), jouer un coup aléatoire
-	if !game.GameOver && game.Mode == "bot" && game.CurrentPlayer == 2 {
+	if isBoardFull() {
+		game.GameOver = true
+		game.Message = "🤝 Match nul ! La grille est pleine."
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	// Passage au joueur suivant
+	game.CurrentPlayer = 3 - game.CurrentPlayer
+	game.Message = "Joueur " + strconv.Itoa(game.CurrentPlayer) + ", choisissez une colonne !"
+
+	// Si mode bot et c'est au tour du bot (joueur 2), le bot joue immédiatement (synchrones)
+	if game.Mode == "bot" && game.CurrentPlayer == 2 && !game.GameOver {
 		// choisir une colonne aléatoire parmi celles qui ne sont pas pleines
-		available := make([]int, 0, 7)
+		available := make([]int, 0, game.Cols)
 		for c := 0; c < 7; c++ {
-			if game.Board[0][c] == 0 {
+			if c < game.Cols && game.Board[0][c] == 0 {
 				available = append(available, c)
 			}
 		}
 		if len(available) > 0 {
-			// choisir un index aléatoire
 			c := available[rand.Intn(len(available))]
-			// déposer le jeton du bot
 			rIndex := -1
-			for i := 5; i >= 0; i-- {
+			for i := game.Rows - 1; i >= 0; i-- {
 				if game.Board[i][c] == 0 {
 					rIndex = i
 					break
@@ -243,18 +294,24 @@ func playHandler(w http.ResponseWriter, r *http.Request) {
 					game.Winner = 2
 					game.GameOver = true
 					game.Message = "Le bot a gagné !"
-				} else if isBoardFull() {
+					http.Redirect(w, r, "/", http.StatusSeeOther)
+					return
+				}
+				if isBoardFull() {
 					game.GameOver = true
 					game.Message = "🤝 Match nul ! La grille est pleine."
-				} else {
-					game.CurrentPlayer = 1
-					game.Message = "Joueur 1, choisissez une colonne !"
+					http.Redirect(w, r, "/", http.StatusSeeOther)
+					return
 				}
+				// revenir au joueur 1
+				game.CurrentPlayer = 1
+				game.Message = "Joueur 1, choisissez une colonne !"
 			}
 		} else {
-			// plus de colonnes disponibles -> match nul
 			game.GameOver = true
 			game.Message = "🤝 Match nul ! La grille est pleine."
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+			return
 		}
 	}
 
@@ -262,48 +319,44 @@ func playHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func checkWin(row, col, player int) bool {
-	count := 1
-	for i := col - 1; i >= 0 && game.Board[row][i] == player; i-- {
-		count++
+	// Check directions: horizontal, vertical, diag (NW-SE), diag (NE-SW)
+	// Use game.ConnectN as the needed aligned tokens count.
+
+	need := game.ConnectN
+
+	// helper to count in a direction (dr, dc), excluding the starting cell
+	countDir := func(dr, dc int) int {
+		cnt := 0
+		r, c := row+dr, col+dc
+		for r >= 0 && r < game.Rows && c >= 0 && c < game.Cols && game.Board[r][c] == player {
+			cnt++
+			r += dr
+			c += dc
+		}
+		return cnt
 	}
-	for i := col + 1; i < 7 && game.Board[row][i] == player; i++ {
-		count++
-	}
-	if count >= 4 {
+
+	// horizontal
+	if 1+countDir(0, -1)+countDir(0, 1) >= need {
 		return true
 	}
-	count = 1
-	for i := row - 1; i >= 0 && game.Board[i][col] == player; i-- {
-		count++
-	}
-	for i := row + 1; i < 6 && game.Board[i][col] == player; i++ {
-		count++
-	}
-	if count >= 4 {
+	// vertical
+	if 1+countDir(-1, 0)+countDir(1, 0) >= need {
 		return true
 	}
-	count = 1
-	for i, j := row-1, col-1; i >= 0 && j >= 0 && game.Board[i][j] == player; i, j = i-1, j-1 {
-		count++
-	}
-	for i, j := row+1, col+1; i < 6 && j < 7 && game.Board[i][j] == player; i, j = i+1, j+1 {
-		count++
-	}
-	if count >= 4 {
+	// diagonal NW-SE
+	if 1+countDir(-1, -1)+countDir(1, 1) >= need {
 		return true
 	}
-	count = 1
-	for i, j := row-1, col+1; i >= 0 && j < 7 && game.Board[i][j] == player; i, j = i-1, j+1 {
-		count++
-	}
-	for i, j := row+1, col-1; i < 6 && j >= 0 && game.Board[i][j] == player; i, j = i+1, j-1 {
-		count++
+	// diagonal NE-SW
+	if 1+countDir(-1, 1)+countDir(1, -1) >= need {
+		return true
 	}
 	return false
 }
 
 func isBoardFull() bool {
-	for col := 0; col < 7; col++ {
+	for col := 0; col < game.Cols; col++ {
 		if game.Board[0][col] == 0 {
 			return false
 		}
@@ -322,7 +375,7 @@ func resetHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func resetGame() {
-	game.Board = [6][7]int{}
+	game.Board = newBoard(game.Rows, game.Cols)
 	game.CurrentPlayer = 1
 	game.Winner = 0
 	game.GameOver = false
@@ -341,9 +394,20 @@ func startHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Read optional variant (4 or 5) from the form and configure the board
+	variant := r.FormValue("variant")
+	if variant == "5" {
+		game.Rows = 7
+		game.Cols = 9
+		game.ConnectN = 5
+	} else {
+		game.Rows = 6
+		game.Cols = 7
+		game.ConnectN = 4
+	}
 	// Activer le mode jeu et reset propre
 	game.Started = true
-	game.Board = [6][7]int{}
+	game.Board = newBoard(game.Rows, game.Cols)
 	game.CurrentPlayer = 1
 	game.Winner = 0
 	game.GameOver = false
@@ -363,7 +427,11 @@ func quitHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	game.Started = false
-	game.Board = [6][7]int{}
+	// Reset to default variant (Puissance 4) when quitting to menu
+	game.Rows = 6
+	game.Cols = 7
+	game.ConnectN = 4
+	game.Board = newBoard(game.Rows, game.Cols)
 	game.CurrentPlayer = 1
 	game.Winner = 0
 	game.GameOver = false
@@ -375,9 +443,23 @@ func quitHandler(w http.ResponseWriter, r *http.Request) {
 
 // gameModeHandler affiche la page qui permet de choisir Duo ou Bot
 func gameModeHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "GET" {
+	// This handler accepts POST from the variant selector with form "variant"
+	// and renders the mode selection page (duo or bot) with that variant.
+	if r.Method != "POST" && r.Method != "GET" {
 		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
 		return
+	}
+
+	var variantInt int
+	if r.Method == "POST" {
+		if err := r.ParseForm(); err == nil {
+			v := r.FormValue("variant")
+			if v == "5" {
+				variantInt = 5
+			} else {
+				variantInt = 4
+			}
+		}
 	}
 
 	tmpl, err := template.New("game_mode.html").ParseFiles("templates/game_mode.html")
@@ -387,7 +469,12 @@ func gameModeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = tmpl.Execute(w, nil)
+	data := struct{
+		Variant    int
+		CSSVersion int64
+	}{Variant: variantInt, CSSVersion: time.Now().Unix()}
+
+	err = tmpl.Execute(w, data)
 	if err != nil {
 		log.Printf("Erreur lors de l'exécution du template game_mode: %v", err)
 		http.Error(w, "Erreur serveur", http.StatusInternalServerError)
@@ -402,8 +489,20 @@ func startBotHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Read variant if any
+	variant := r.FormValue("variant")
+	if variant == "5" {
+		game.Rows = 7
+		game.Cols = 9
+		game.ConnectN = 5
+	} else {
+		game.Rows = 6
+		game.Cols = 7
+		game.ConnectN = 4
+	}
+
 	game.Started = true
-	game.Board = [6][7]int{}
+	game.Board = newBoard(game.Rows, game.Cols)
 	game.CurrentPlayer = 1
 	game.Winner = 0
 	game.GameOver = false

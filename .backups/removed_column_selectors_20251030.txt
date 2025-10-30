@@ -1,0 +1,66 @@
+# Backup of removed CSS: column selectors and related rules
+# File: static/styles.css
+# Date: 2025-10-30
+
+/* Contrôles de jeu */
+.game-controls {
+    margin-bottom: 30px; /* espace sous les contrôles */
+}
+
+.column-selector {
+    margin-bottom: 20px; /* espace sous le sélecteur de colonne */
+}
+
+.column-buttons {
+    display: grid; /* utilise une grille CSS */
+    grid-template-columns: repeat(7, 1fr); /* 7 colonnes égales */
+    gap: 10px; /* espacement entre boutons */
+    margin-bottom: 20px; /* espace sous la grille */
+}
+
+/* .column-btn : style des boutons qui peuvent représenter des colonnes
+    (optionnel si tu utilises des boutons pour jouer). */
+.column-btn {
+    padding: 15px; /* espacement interne du bouton */
+    font-size: 1.2em; /* taille du texte */
+    font-weight: bold; /* texte en gras */
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* dégradé bleu/violet */
+    color: white; /* couleur du texte */
+    border: none; /* pas de bordure par défaut */
+    border-radius: 10px; /* arrondis */
+    cursor: pointer; /* curseur pointeur au survol */
+    transition: all 0.3s ease; /* animation douce pour le survol */
+    text-transform: uppercase; /* texte en majuscules */
+    letter-spacing: 1px; /* espacement entre lettres */
+}
+
+/* .column-btn:hover : style au survol des boutons de colonne.
+    - Fournit une ombre et une translation pour indiquer l'interaction. */
+.column-btn:hover {
+    transform: translateY(-2px); /* remonte légèrement le bouton */
+    box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3); /* ombre portée au survol */
+}
+
+/* .column-btn:active : style au moment du clic (état actif). */
+.column-btn:active {
+    transform: translateY(0); /* remet le bouton à sa position au clic */
+}
+
+/* Responsive (extraits) */
+@media (max-width: 768px) {
+    .column-buttons {
+        gap: 5px; /* réduit l'espacement entre boutons */
+    }
+
+    .column-btn {
+        padding: 10px; /* réduit padding des boutons */
+        font-size: 1em; /* texte plus petit */
+    }
+}
+
+@media (max-width: 480px) {
+    .column-btn {
+        padding: 8px; /* padding réduit pour boutons */
+        font-size: 0.9em; /* texte plus petit */
+    }
+}

@@ -1,395 +1,467 @@
-/* Reset et styles de base */
+/* Réinitialisation et styles de base */
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+    margin: 0; /* supprime les marges par défaut du navigateur */
+    padding: 0; /* supprime les paddings par défaut du navigateur */
+    box-sizing: border-box; /* inclut la bordure/padding dans la largeur/hauteur */
 }
 
+/* Corps de la page : contient les règles de base d'affichage et le
+    centrage global de l'application (police, fond, centrage vertical/horizontal). */
 body {
-    font-family: 'Arial', sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #333;
-    padding: 20px;
+    font-family: 'Arial', sans-serif; /* définit la police principale du document */
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* fond en dégradé diagonal */
+    min-height: 100vh; /* hauteur minimale = hauteur de la fenêtre */
+    display: flex; /* active flexbox pour centrer le conteneur */
+    align-items: center; /* centre verticalement le contenu */
+    justify-content: center; /* centre horizontalement le contenu */
+    color: #333; /* couleur de texte par défaut */
+    padding: 20px; /* espacement intérieur autour de la page */
 }
 
+/* Conteneur principal : panneau blanc central qui contient tout le
+    contenu de l'application (header, main, footer). */
 .container {
-    background: white;
-    border-radius: 20px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-    padding: 30px;
-    max-width: 800px;
-    width: 100%;
+    background: white; /* fond blanc pour le panneau principal */
+    border-radius: 20px; /* coins arrondis */
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1); /* ombre portée pour relief */
+    padding: 30px; /* espace intérieur autour du contenu */
+    max-width: 800px; /* largeur maximale du conteneur */
+    width: 100%; /* prend toute la largeur disponible jusqu'à max-width */
 }
 
-/* Header */
+/* En-tête */
 header {
-    text-align: center;
-    margin-bottom: 30px;
+    text-align: center; /* centre le texte du header */
+    margin-bottom: 30px; /* espace sous le header */
 }
 
 h1 {
-    font-size: 2.5em;
-    color: #4a5568;
-    margin-bottom: 10px;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    font-size: 2.5; /* taille du titre principal */
+    color: #4a5568; /* couleur du titre */
+    margin-bottom: 10px; /* espace sous le titre */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1); /* ombre légère du texte */
 }
 
 .subtitle {
-    color: #718096;
-    font-size: 1.1em;
+    color: #718096; /* couleur du sous-titre */
+    font-size: 1.1em; /* taille du sous-titre */
 }
 
 /* Informations du jeu */
 .game-info {
-    background: #f7fafc;
-    padding: 20px;
-    border-radius: 10px;
-    margin-bottom: 30px;
-    border: 2px solid #e2e8f0;
+    background: #f7fafc; /* fond clair du panneau d'infos */
+    padding: 20px; /* espacement interne */
+    border-radius: 10px; /* coins arrondis */
+    margin-bottom: 30px; /* espace sous le panneau */
+    border: 2px solid #e2e8f0; /* bordure discrète */
 }
 
 .current-player {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 10px;
+    display: flex; /* utilise flex pour aligner label et indicateur */
+    align-items: center; /* centrer verticalement les éléments */
+    justify-content: center; /* centrer horizontalement */
+    gap: 10px; /* espace entre éléments */
+    margin-bottom: 10px; /* espace sous le bloc */
 }
 
 .label {
-    font-weight: bold;
-    color: #4a5568;
+    font-weight: bold; /* texte en gras pour le label */
+    color: #4a5568; /* couleur du label */
 }
 
 .player-indicator {
-    font-size: 1.2em;
-    font-weight: bold;
-    padding: 8px 16px;
-    border-radius: 20px;
-    color: white;
+    font-size: 1.2em; /* taille du texte de l'indicateur */
+    font-weight: bold; /* texte en gras */
+    padding: 8px 16px; /* espacement interne */
+    border-radius: 20px; /* bord arrondi pour l'indicateur */
+    color: white; /* couleur du texte (sur fond coloré) */
 }
 
 .player-indicator.player-1 {
-    background: #e53e3e;
+    background: #e53e3e; /* couleur rouge pour le joueur 1 */
 }
 
 .player-indicator.player-2 {
-    background: #3182ce;
+    background: #3182ce; /* couleur bleue pour le joueur 2 */
 }
 
 .status-message {
-    text-align: center;
-    font-size: 1.1em;
-    color: #2d3748;
-    font-weight: 500;
+    text-align: center; /* centre le message d'état */
+    font-size: 1.1em; /* taille du texte */
+    color: #2d3748; /* couleur du texte */
+    font-weight: 500; /* poids du texte */
 }
 
 /* Plateau de jeu */
 .game-board {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 30px;
+    display: flex; /* container flex pour centrer le plateau */
+    justify-content: center; /* centre horizontalement le plateau */
+    margin-bottom: 30px; /* espace sous le plateau */
 }
 
 .board-table {
-    border-collapse: separate;
-    border-spacing: 5px;
-    background: #2d3748;
-    padding: 15px;
-    border-radius: 15px;
-    box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.3);
+    border-collapse: separate; /* espace entre cellules géré par border-spacing */
+    border-spacing: 5px; /* espace entre les cellules du tableau */
+    background: #2d3748; /* fond sombre entourant les cellules */
+    padding: 15px; /* espace interne autour des cellules */
+    border-radius: 15px; /* coins arrondis du conteneur */
+    box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.3); /* ombre interne pour profondeur */
 }
 
+/* .cell : règle principale pour chaque cellule du plateau.
+     - 'cell' correspond au <td> utilisé pour afficher un emplacement du jeu.
+     - Les classes additionnelles comme 'player-1' ou 'highlight' modifient
+         l'apparence de cette cellule selon l'état (occupée, survolée, etc.). */
 .cell {
-    width: 60px;
-    height: 60px;
-    background: #4a5568;
-    border-radius: 50%;
-    text-align: center;
-    vertical-align: middle;
-    position: relative;
-    transition: all 0.3s ease;
-    border: 3px solid #2d3748;
+    width: 60px; /* largeur fixe d'une cellule */
+    height: 60px; /* hauteur fixe d'une cellule */
+    background: #4a5568; /* couleur de fond par défaut de la cellule */
+    border-radius: 50%; /* forme circulaire */
+    text-align: center; /* centre le contenu horizontalement */
+    vertical-align: middle; /* aligne verticalement dans les cellules du tableau */
+    position: relative; /* permet positionnement absolu d'éléments internes */
+    transition: all 0.3s ease; /* transition douce pour survol/transform */
+    border: 3px solid #2d3748; /* bord sombre autour du cercle */
 }
 
+/* .cell:hover : état visuel appliqué quand la souris survole la cellule.
+     - Utilisé pour donner un feedback à l'utilisateur (change de couleur
+         et légère transformation). */
 .cell:hover {
-    background: #718096;
-    transform: scale(1.05);
+    background: #718096; /* couleur au survol */
+    transform: scale(1.05); /* léger agrandissement au survol */
 }
 
+/* .cell.highlight : classe appliquée dynamiquement (JS) pour mettre
+    en évidence une cellule/colonne (par exemple lors du hover sur la colonne).
+    - 'highlight' est une classe utilitaire : elle n'est pas liée au joueur. */
 .cell.highlight {
-    background: #a0aec0;
-    box-shadow: 0 0 10px rgba(160, 174, 192, 0.5);
+    background: #a0aec0; /* couleur de mise en évidence (highlight) */
+    box-shadow: 0 0 10px rgba(160, 174, 192, 0.5); /* lueur autour */
 }
 
+/* .cell.player-1 : état visuel quand la cellule est occupée par le joueur 1.
+     - Habituellement ajoutée côté serveur ou template lorsque la case contient
+         le jeton du joueur 1. Remplace la couleur par une teinte Rouge. */
 .cell.player-1 {
-    background: #e53e3e;
-    box-shadow: 0 4px 8px rgba(229, 62, 62, 0.3);
+    background: #e53e3e; /* fond rouge pour cellules occupées par joueur 1 */
+    box-shadow: 0 4px 8px rgba(229, 62, 62, 0.3); /* ombre colorée */
 }
 
+/* .cell.player-2 : état visuel quand la cellule est occupée par le joueur 2.
+    - Similaire à player-1 mais couleur bleue. */
 .cell.player-2 {
-    background: #3182ce;
-    box-shadow: 0 4px 8px rgba(49, 130, 206, 0.3);
+    background: #3182ce; /* fond bleu pour cellules occupées par joueur 2 */
+    box-shadow: 0 4px 8px rgba(49, 130, 206, 0.3); /* ombre colorée */
 }
 
+/* .token : style du caractère/élément affichant le jeton (●).
+    - Les jetons utilisent un caractère texte (ou pseudo-élément) stylisé.
+    - `.token.empty` rend le jeton invisible pour les cases vides. */
 .token {
-    font-size: 2em;
-    line-height: 1;
-    color: white;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    font-size: 2em; /* taille du caractère représentant le jeton */
+    line-height: 1; /* alignement vertical du caractère */
+    color: white; /* couleur du jeton */
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3); /* légère ombre pour relief */
 }
 
+/* .token.empty : état pour un emplacement vide (masque le symbole).
+    - Utilisé dans le template lorsque la valeur de la case est 0. */
 .token.empty {
-    color: transparent;
+    color: transparent; /* masque le symbole pour une cellule vide */
 }
 
-/* Contrôles de jeu */
-.game-controls {
-    margin-bottom: 30px;
-}
+/* Contrôles de jeu : supprimés car l'interaction se fait désormais en
+   cliquant directement sur les cellules du plateau. Les styles liés à
+   la sélection par colonne sont conservés dans ".backups/removed_column_selectors_20251030.txt" */
 
-.column-selector {
-    margin-bottom: 20px;
-}
-
-.column-buttons {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-.column-btn {
-    padding: 15px;
-    font-size: 1.2em;
-    font-weight: bold;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.column-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
-}
-
-.column-btn:active {
-    transform: translateY(0);
-}
-
+/* .action-buttons : conteneur des boutons d'actions secondaires
+    (Actualiser, Retour au menu, Nouvelle partie). */
 .action-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
+    display: flex; /* organise les boutons en ligne */
+    justify-content: center; /* centre horizontalement les boutons */
+    gap: 15px; /* espace entre boutons */
 }
 
+/* .btn : style générique pour les boutons (réutilisable).
+     - Variantes : .btn-primary (action principale), .btn-secondary (moins pri.),
+         .btn-play (bouton Jouer avec gradient). */
 .btn {
-    padding: 12px 24px;
-    border: none;
-    border-radius: 8px;
-    font-size: 1em;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-decoration: none;
-    display: inline-block;
-    text-align: center;
+    padding: 12px 24px; /* taille par défaut des boutons */
+    border: none; /* pas de bordure par défaut */
+    border-radius: 8px; /* coins arrondis */
+    font-size: 1em; /* taille du texte */
+    font-weight: bold; /* texte en gras */
+    cursor: pointer; /* curseur au survol */
+    transition: all 0.3s ease; /* animation pour survol / état actif */
+    text-decoration: none; /* supprime soulignement des liens */
+    display: inline-block; /* comportement inline mais box */
+    text-align: center; /* centre le texte */
 }
 
+/* .btn-primary : variante verte pour actions importantes (ex: Nouvelle partie). */
 .btn-primary {
-    background: #48bb78;
-    color: white;
+    background: #48bb78; /* fond vert pour action principale */
+    color: white; /* texte en blanc */
 }
 
+/* .btn-primary:hover : état au survol du bouton principal. */
 .btn-primary:hover {
-    background: #38a169;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(72, 187, 120, 0.3);
+    background: #38a169; /* fond un peu plus foncé au survol */
+    transform: translateY(-2px); /* remonte légèrement */
+    box-shadow: 0 8px 16px rgba(72, 187, 120, 0.3); /* ombre */
 }
 
+/* .btn-secondary : variante grise pour actions secondaires (ex: Règles). */
 .btn-secondary {
-    background: #a0aec0;
-    color: white;
+    background: #a0aec0; /* fond gris pour actions secondaires */
+    color: white; /* texte blanc */
 }
 
+/* .btn-secondary:hover : état au survol du bouton secondaire. */
 .btn-secondary:hover {
-    background: #718096;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(160, 174, 192, 0.3);
+    background: #718096; /* gris plus foncé au survol */
+    transform: translateY(-2px); /* remonte */
+    box-shadow: 0 8px 16px rgba(160, 174, 192, 0.3); /* ombre */
 }
 
 /* Écran de menu */
+/* .menu-screen : panneau d'accueil affiché avant le début de la partie.
+    - Contient les boutons pour choisir le mode et les liens utilitaires. */
 .menu-screen {
-    background: #f7fafc;
-    border: 2px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 30px;
-    text-align: center;
-    margin-bottom: 30px;
+    background: #f7fafc; /* fond clair du panneau menu */
+    border: 2px solid #e2e8f0; /* bordure discrète */
+    border-radius: 12px; /* arrondis */
+    padding: 30px; /* espacement interne */
+    text-align: center; /* centre le contenu */
+    margin-bottom: 30px; /* espace sous le menu */
 }
 
+/* .menu-screen h2 : style du titre principal du panneau menu. */
 .menu-screen h2 {
-    color: #2d3748;
-    font-size: 1.8em;
-    margin-bottom: 10px;
+    color: #2d3748; /* couleur du titre du menu */
+    font-size: 1.8em; /* taille */
+    margin-bottom: 10px; /* espace sous */
 }
 
+/* .menu-subtitle : style du texte secondaire sous le titre du menu. */
 .menu-subtitle {
-    color: #718096;
-    margin-bottom: 20px;
+    color: #718096; /* couleur du sous-titre du menu */
+    margin-bottom: 20px; /* espace sous */
 }
 
+/* .menu-actions : conteneur horizontal des actions principales du menu. */
 .menu-actions {
-    margin: 15px 0 10px;
+    margin: 15px 0 10px; /* marges haut/droite/bas/gauche */
 }
 
+/* Page de sélection de variante (Puissance 4 / Puissance 5)
+   - ajoute un espacement entre le texte explicatif et les boutons
+   - centre les boutons dans le rectangle et les espace proprement */
+.mode-selection {
+    text-align: center; /* centre le contenu à l'intérieur */
+    padding: 22px; /* espace interne autour du contenu */
+    background: #f7fafc; /* fond clair similaire au panneau menu */
+    border: 2px solid #e2e8f0; /* bordure discrète */
+    border-radius: 12px; /* arrondis */
+    margin-top: 18px; /* écarte le bloc du header/retour */
+    display: flex;
+    flex-direction: column; /* empile verticalement le paragraphe puis les boutons */
+    align-items: center; /* centre horizontalement les éléments */
+    gap: 16px; /* espace entre le paragraphe et les boutons */
+}
+
+.mode-selection p {
+    margin: 0; /* laisser le gap gérer l'espacement */
+    color: #4a5568;
+    max-width: 720px; /* limite la largeur du texte pour la lisibilité */
+}
+
+.mode-selection form {
+    display: inline-block; /* permet aux forms d'être centrés par text-align */
+}
+
+.mode-selection .btn {
+    min-width: 200px; /* force une largeur homogène pour les boutons */
+}
+
+/* .btn-play : bouton 'Jouer' spécifique (gradient vert) utilisé sur la page d'accueil. */
 .btn-play {
-    background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
-    color: white;
-    padding: 14px 28px;
-    border-radius: 10px;
-    font-size: 1.1em;
-    font-weight: 800;
-    border: none;
-    cursor: pointer;
-    transition: all 0.25s ease;
+    background: linear-gradient(135deg, #34d399 0%, #10b981 100%); /* gradient vert vif */
+    color: white; /* texte blanc */
+    padding: 14px 28px; /* espacement interne */
+    border-radius: 10px; /* arrondis */
+    font-size: 1.1em; /* taille du texte */
+    font-weight: 800; /* texte très gras */
+    border: none; /* pas de bordure */
+    cursor: pointer; /* curseur pointeur */
+    transition: all 0.25s ease; /* transition pour le survol */
 }
 
+/* .btn-play:hover : état au survol pour le bouton Jouer (remonte et ajoute une ombre). */
 .btn-play:hover {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 10px 18px rgba(16, 185, 129, 0.35);
+    transform: translateY(-2px) scale(1.02); /* remonte et agrandit légèrement */
+    box-shadow: 0 10px 18px rgba(16, 185, 129, 0.35); /* ombre colorée */
+    background: #718096; /* devient gris comme les boutons secondaires au survol */
+    color: white; /* assure que le texte reste lisible sur fond gris */
 }
 
 .menu-hint {
-    color: #4a5568;
-    font-size: 0.95em;
-    margin-top: 10px;
+    color: #4a5568; /* couleur du petit texte d'aide */
+    font-size: 0.95em; /* taille légèrement plus petite */
+    margin-top: 10px; /* espace au dessus */
 }
 
-/* Utils */
-.hidden { display: none !important; }
+/* Utilitaires */
+.hidden { display: none !important; } /* cache un élément quel que soit son état */
 
 /* Informations des joueurs */
 .players-info {
-    display: flex;
-    justify-content: space-around;
-    background: #f7fafc;
-    padding: 20px;
-    border-radius: 10px;
-    margin-bottom: 30px;
-    border: 2px solid #e2e8f0;
+    display: flex; /* disposition en ligne flexible */
+    justify-content: space-around; /* espace équivalent autour des enfants */
+    background: #f7fafc; /* fond clair */
+    padding: 20px; /* espacement interne */
+    border-radius: 10px; /* coins arrondis */
+    margin-bottom: 30px; /* espace sous le bloc */
+    border: 2px solid #e2e8f0; /* bordure */
 }
 
 .player-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: bold;
-    font-size: 1.1em;
+    display: flex; /* aligne le token et le nom */
+    align-items: center; /* centrer verticalement */
+    gap: 10px; /* espace entre token et nom */
+    font-weight: bold; /* texte en gras */
+    font-size: 1.1em; /* taille du texte */
 }
 
 .player-info.player-1 .player-token {
-    color: #e53e3e;
+    color: #e53e3e; /* couleur du token du joueur 1 */
 }
 
 .player-info.player-2 .player-token {
-    color: #3182ce;
+    color: #3182ce; /* couleur du token du joueur 2 */
 }
 
 .player-token {
-    font-size: 1.5em;
+    font-size: 1.5em; /* taille du symbole token dans la fiche joueur */
 }
 
 /* Fin de jeu */
-.game-over {
+/* NOTE: Le bloc .game-over était utilisé pour afficher un bandeau en bas de page
+   quand la partie se termine. Ce rendu est remplacé par une notification modale.
+   On laisse ces styles commentés/retirés pour éviter l'affichage multiple.
+   Si vous voulez restaurer l'ancien bandeau, récupérez les règles depuis la
+   sauvegarde ou supprimez ce commentaire et remettez la classe dans le template. */
+
+/* Notification (modal/toast) pour fin de partie */
+.notification {
+    position: fixed; /* overlay centré */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex; /* centre le contenu */
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.4); /* fond semi-transparent */
+    z-index: 2000; /* au-dessus de tout */
+    padding: 20px;
+}
+
+.notification.hidden { display: none !important; }
+.notification.visible { display: flex !important; }
+
+.notification-content {
     background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
     color: white;
-    padding: 30px;
-    border-radius: 15px;
+    padding: 22px 24px;
+    border-radius: 12px;
+    max-width: 520px;
+    width: 100%;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.35);
+    position: relative;
     text-align: center;
-    margin-bottom: 30px;
-    box-shadow: 0 10px 20px rgba(240, 147, 251, 0.3);
 }
 
-.game-over h2 {
-    font-size: 2em;
-    margin-bottom: 10px;
+.notification-title {
+    font-size: 1.6em;
+    margin-bottom: 8px;
 }
 
-.game-over p {
-    font-size: 1.2em;
+.notification-body {
+    font-size: 1.05em;
+    margin-bottom: 18px;
 }
 
-/* Footer */
+.notification-actions { display:flex; justify-content:center; gap:10px; }
+
+.notification-close {
+    position: absolute;
+    right: 10px;
+    top: 8px;
+    background: transparent;
+    border: none;
+    color: rgba(255,255,255,0.9);
+    font-size: 1.6em;
+    cursor: pointer;
+}
+
+@media (max-width: 480px) {
+    .notification-content { padding: 18px; }
+    .notification-title { font-size: 1.3em; }
+}
+
+/* Pied de page */
 footer {
-    text-align: center;
-    color: #718096;
-    font-size: 0.9em;
-    margin-top: 20px;
+    text-align: center; /* centre le contenu du footer */
+    color: #718096; /* couleur discrète */
+    font-size: 0.9em; /* petite taille */
+    margin-top: 20px; /* espace au dessus du footer */
 }
 
-/* Responsive */
+/* Adaptation aux petits écrans */
 @media (max-width: 768px) {
     .container {
-        padding: 20px;
-        margin: 10px;
+        padding: 20px; /* réduit le padding sur tablettes */
+        margin: 10px; /* léger margin pour respirer */
     }
     
     h1 {
-        font-size: 2em;
+        font-size: 2em; /* titre légèrement réduit */
     }
     
     .cell {
-        width: 45px;
+        width: 45px; /* cellules plus petites pour écran medium */
         height: 45px;
     }
     
     .token {
-        font-size: 1.5em;
+        font-size: 1.5em; /* jetons réduits */
     }
     
-    .column-buttons {
-        gap: 5px;
-    }
-    
-    .column-btn {
-        padding: 10px;
-        font-size: 1em;
-    }
+    /* Règles responsives pour les boutons de colonne supprimées (backup présent) */
     
     .action-buttons {
-        flex-direction: column;
-        align-items: center;
+        flex-direction: column; /* empile verticalement les actions */
+        align-items: center; /* centre les boutons */
     }
     
     .players-info {
-        flex-direction: column;
-        gap: 15px;
-        align-items: center;
+        flex-direction: column; /* empile les infos joueur */
+        gap: 15px; /* espace entre lignes */
+        align-items: center; /* centre le contenu */
     }
 }
 
 @media (max-width: 480px) {
     .cell {
-        width: 35px;
+        width: 35px; /* petites cellules pour très petits écrans */
         height: 35px;
     }
     
     .token {
-        font-size: 1.2em;
+        font-size: 1.2em; /* jeton encore réduit */
     }
     
-    .column-btn {
-        padding: 8px;
-        font-size: 0.9em;
-    }
+    /* Règles responsives pour .column-btn supprimées (backup présent) */
 }

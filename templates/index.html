@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Power4 Web - Jeu Puissance 4</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/styles.css?v={{.CSSVersion}}">
 </head>
 <body>
     <div class="container">
@@ -21,13 +21,10 @@
                 <p class="menu-subtitle">Préparez-vous pour une partie de Puissance 4 !</p>
 
                 <div class="menu-actions">
-                    <form action="/start" method="POST" style="display:inline-block; margin-right:10px;">
-                        <button type="submit" class="btn btn-play">▶ Jouer en duo</button>
-                    </form>
-
-                    <form action="/start-bot" method="POST" style="display:inline-block; margin-left:10px;">
-                        <button type="submit" class="btn btn-play btn-secondary"> Jouer contre le bot</button>
-                    </form>
+                    <!-- Avant de choisir le mode (duo/bot) on choisit d'abord la variante
+                         (Puissance 4 ou Puissance 5). Le bouton 'Jouer' mène à la page
+                         de sélection de la variante. -->
+                    <a href="/variant" class="btn btn-play">▶ Jouer</a>
                 </div>
 
                 <div class="menu-extra-actions">
@@ -35,7 +32,7 @@
                     <a href="/blank" class="btn btn-secondary"> Page vide</a>
                 </div>
 
-                <p class="menu-hint">Astuce : cliquez sur une case du plateau pour déposer un jeton.</p>
+                <p class="menu-hint"> </p>
             </section>
             {{end}}
 
@@ -97,25 +94,31 @@
                 </div>
             </div>
 
-            <!-- Statut de fin de jeu -->
-            {{if and .Started .GameOver}}
-            <div class="game-over">
-                {{if .Winner}}
-                <h2>🎉 Félicitations !</h2>
-                <p>Le <strong>Joueur {{.Winner}}</strong> a gagné !</p>
-                {{else}}
-                <h2>🤝 Match nul !</h2>
-                <p>La grille est pleine, personne n'a gagné.</p>
-                {{end}}
+            <!-- Notification de fin de partie (remplace le bandeau en bas) -->
+            <!-- Utilise les attributs data-* pour que le JS puisse décider d'afficher
+                 la notification après le rendu côté serveur. -->
+            <div id="game-notification" class="notification hidden" role="dialog" aria-live="assertive"
+                 data-gameover="{{.GameOver}}" data-winner="{{.Winner}}" data-message="{{.Message}}">
+                <div class="notification-content">
+                    <button class="notification-close" aria-label="Fermer">&times;</button>
+                    <h2 class="notification-title"></h2>
+                    <p class="notification-body"></p>
+                    <div class="notification-actions">
+                        <form action="/reset" method="POST" style="display:inline; margin-right:8px;">
+                            <button type="submit" class="btn btn-primary">Nouvelle partie</button>
+                        </form>
+                        <form action="/quit" method="POST" style="display:inline;">
+                            <button type="submit" class="btn btn-secondary">Retour au menu</button>
+                        </form>
+                    </div>
+                </div>
             </div>
-            {{end}}
         </main>
 
         <footer>
             <p>Power4 Web - Développé avec Go et HTML Templates</p>
         </footer>
     </div>
-
     <script>
         // Clique sur une cellule pour jouer dans la colonne correspondante
         document.querySelectorAll('.board-table td').forEach(cell => {
@@ -152,6 +155,58 @@
                 cells.forEach(c => c.classList.remove('highlight'));
             });
         });
+    </script>
+    <script>
+        // Notification de fin de partie : affiche un modal/toast si data-gameover vaut true
+        (function() {
+            const notif = document.getElementById('game-notification');
+            if (!notif) return;
+
+            // Les attributs data-* sont rendus côté serveur
+            const isOver = notif.dataset.gameover === 'true' || notif.dataset.gameover === '1';
+            const winner = parseInt(notif.dataset.winner) || 0;
+            const message = notif.dataset.message || '';
+
+            const titleEl = notif.querySelector('.notification-title');
+            const bodyEl = notif.querySelector('.notification-body');
+            const closeBtn = notif.querySelector('.notification-close');
+
+            function showNotification() {
+                // Remplir le contenu selon le résultat
+                if (winner && winner > 0) {
+                    titleEl.textContent = '🎉 Félicitations !';
+                    bodyEl.textContent = 'Le Joueur ' + winner + ' a gagné !';
+                } else if (message && message.indexOf('Match nul') !== -1) {
+                    titleEl.textContent = '🤝 Match nul !';
+                    bodyEl.textContent = 'La grille est pleine, personne n\'a gagné.';
+                } else if (message) {
+                    titleEl.textContent = '';
+                    bodyEl.textContent = message;
+                } else {
+                    titleEl.textContent = 'Fin de la partie';
+                    bodyEl.textContent = '';
+                }
+
+                notif.classList.remove('hidden');
+                notif.classList.add('visible');
+                // focus sur le bouton fermer pour accessibilité
+                if (closeBtn) closeBtn.focus();
+            }
+
+            function hideNotification() {
+                notif.classList.remove('visible');
+                notif.classList.add('hidden');
+            }
+
+            if (isOver) {
+                // Laisser un court delay pour que la page soit entièrement visible
+                setTimeout(showNotification, 80);
+            }
+
+            if (closeBtn) {
+                closeBtn.addEventListener('click', hideNotification);
+            }
+        })();
     </script>
 </body>
 </html>

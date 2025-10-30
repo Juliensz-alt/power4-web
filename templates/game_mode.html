@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Choisir le mode - Power4</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/styles.css?v={{.CSSVersion}}">
 </head>
 <body>
     <div class="container">
@@ -15,15 +15,20 @@
 
         <main>
             <section class="mode-selection">
-                <form action="/start" method="POST" style="display:inline-block; margin-right: 10px;">
-                    <button type="submit" class="btn btn-primary">Jouer en duo</button>
-                </form>
+                    <p>Variante sélectionnée : <strong>{{if .Variant}}{{.Variant}}{{else}}4{{end}}</strong>
+                    {{if eq .Variant 5}}(Puissance 5 — tableau 7x9, aligner 5){{end}}</p>
 
-                <form action="/start-bot" method="POST" style="display:inline-block; margin-left: 10px;">
-                    <button type="submit" class="btn btn-primary">Jouer contre le bot</button>
-                </form>
+                    <form action="/start" method="POST" style="display:inline-block; margin-right: 10px;">
+                        <input type="hidden" name="variant" value="{{if .Variant}}{{.Variant}}{{else}}4{{end}}">
+                        <button type="submit" class="btn btn-primary">Jouer en duo</button>
+                    </form>
 
-            </section>
+                    <form action="/start-bot" method="POST" style="display:inline-block; margin-left: 10px;">
+                        <input type="hidden" name="variant" value="{{if .Variant}}{{.Variant}}{{else}}4{{end}}">
+                        <button type="submit" class="btn btn-primary">Jouer contre le bot</button>
+                    </form>
+
+                </section>
         </main>
 
         <footer>
