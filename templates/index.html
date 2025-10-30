@@ -58,12 +58,12 @@
                         <td class="cell {{if eq $col 1}}player-1{{else if eq $col 2}}player-2{{end}}" 
                             data-column="{{$colIndex}}">
                             {{if eq $col 1}}
-                                <div class="token player-1">●</div>
-                            {{else if eq $col 2}}
-                                <div class="token player-2">●</div>
-                            {{else}}
-                                <div class="token empty"></div>
-                            {{end}}
+                                    <div class="token"></div>
+                                {{else if eq $col 2}}
+                                    <div class="token"></div>
+                                {{else}}
+                                    <div class="token empty"></div>
+                                {{end}}
                         </td>
                         {{end}}
                     </tr>

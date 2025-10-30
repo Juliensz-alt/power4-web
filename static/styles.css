@@ -155,20 +155,21 @@ h1 {
     box-shadow: 0 4px 8px rgba(49, 130, 206, 0.3); /* ombre colorée */
 }
 
-/* .token : style du caractère/élément affichant le jeton (●).
-    - Les jetons utilisent un caractère texte (ou pseudo-élément) stylisé.
-    - `.token.empty` rend le jeton invisible pour les cases vides. */
+/* .token : élément interne utilisé pour positionner/réserver l'espace du jeton.
+   Nous utilisons désormais la couleur du .cell pour représenter le jeton,
+   et nous retirons le caractère '●' blanc. Le .token est un cercle interne
+   transparent par défaut pour laisser voir la couleur de la cellule. */
 .token {
-    font-size: 2em; /* taille du caractère représentant le jeton */
-    line-height: 1; /* alignement vertical du caractère */
-    color: white; /* couleur du jeton */
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3); /* légère ombre pour relief */
+    width: 80%;
+    height: 80%;
+    border-radius: 50%;
+    margin: auto; /* centre dans la cellule */
+    background: transparent; /* pas de point blanc au milieu */
+    box-shadow: none; /* pas d'ombrage blanc */
 }
 
-/* .token.empty : état pour un emplacement vide (masque le symbole).
-    - Utilisé dans le template lorsque la valeur de la case est 0. */
 .token.empty {
-    color: transparent; /* masque le symbole pour une cellule vide */
+    background: transparent;
 }
 
 /* Contrôles de jeu : supprimés car l'interaction se fait désormais en
