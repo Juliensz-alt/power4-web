@@ -78,7 +78,7 @@ func SetupRoutes() {
 	http.HandleFunc("/quit", quitHandler)
 	// Pages utilitaires
 	http.HandleFunc("/rules", rulesHandler)
-	http.HandleFunc("/blank", blankHandler)
+	http.HandleFunc("/history", historyHandler)
 	http.HandleFunc("/variant", variantHandler)
 	// Sélection du mode (duo/bot)
 	http.HandleFunc("/game-mode", gameModeHandler)
@@ -198,24 +198,24 @@ func rulesHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 
-// blankHandler affiche une page pour l'instant vide (placeholder)
-// Méthode : GET, rend `templates/blank.html`.
-func blankHandler(w http.ResponseWriter, r *http.Request) {
+// historyHandler affiche la page Histoire
+// Méthode : GET, rend `templates/history.html`.
+func historyHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
 		return
 	}
 
-	tmpl, err := template.New("blank.html").ParseFiles("templates/blank.html")
+	tmpl, err := template.New("history.html").ParseFiles("templates/history.html")
 	if err != nil {
-		log.Printf("Erreur lors du parsing du template blank: %v", err)
+		log.Printf("Erreur lors du parsing du template history: %v", err)
 		http.Error(w, "Erreur serveur", http.StatusInternalServerError)
 		return
 	}
 
 	err = tmpl.Execute(w, nil)
 	if err != nil {
-		log.Printf("Erreur lors de l'exécution du template blank: %v", err)
+		log.Printf("Erreur lors de l'exécution du template history: %v", err)
 		http.Error(w, "Erreur serveur", http.StatusInternalServerError)
 		return
 	}
