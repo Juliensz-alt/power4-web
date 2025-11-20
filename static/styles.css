@@ -466,3 +466,65 @@ footer {
     
     /* Règles responsives pour .column-btn supprimées (backup présent) */
 }
+
+/* Styles spécifiques pour la page des règles (`templates/rules.html`) */
+.rules {
+    background: linear-gradient(180deg, #ffffff 0%, #fbfcff 100%);
+    padding: 22px 26px;
+    border-radius: 12px;
+    border-left: 6px solid rgba(76, 81, 191, 0.95); /* accent violet */
+    margin-bottom: 30px;
+    line-height: 1.7; /* meilleur interligne pour la lecture */
+    color: #2d3748; /* couleur principale du texte */
+    box-shadow: 0 6px 18px rgba(44, 49, 84, 0.06);
+}
+
+.rules h2 {
+    color: #4c51bf; /* titre violet plus marqué */
+    margin-top: 18px;
+    margin-bottom: 10px;
+    font-size: 1.25em;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.rules h2::before {
+    content: "";
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f97316 0%, #ef4444 100%); /* petit point coloré */
+    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.18);
+}
+
+.rules p,
+.rules ul {
+    margin-bottom: 18px; /* espace généreux entre paragraphes/sections */
+    font-size: 1.05em;
+    color: #374151; /* teinte légèrement plus sombre pour le texte */
+}
+
+.rules ul {
+    padding-left: 18px; /* indentation propre pour les listes */
+}
+
+.rules ul li {
+    margin-bottom: 8px; /* espacement entre items */
+    padding-left: 6px;
+}
+
+.rules ul li::marker {
+    color: #4c51bf; /* couleur des puces */
+}
+
+/* Amélioration de lisibilité pour petits écrans */
+@media (max-width: 480px) {
+    .rules {
+        padding: 16px;
+    }
+
+    .rules h2 { font-size: 1.1em; }
+}
