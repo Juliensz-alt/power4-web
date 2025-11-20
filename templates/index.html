@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Power4 Web - Jeu Puissance 4</title>
+    <!-- Lien vers la feuille de style. On ajoute ?v={{.CSSVersion}} pour
+        forcer le rechargement du CSS quand on met à jour (cache-busting) -->
     <link rel="stylesheet" href="/static/styles.css?v={{.CSSVersion}}">
 </head>
 <body>
@@ -15,6 +17,7 @@
 
         <main>
             <!-- Écran de menu avant le début de la partie -->
+            <!-- Si .Started est false, on affiche cet écran pour lancer une partie. -->
             {{if not .Started}}
             <section class="menu-screen">
                 <h2>Bienvenue dans Power4</h2>
@@ -37,6 +40,7 @@
             {{end}}
 
             <!-- Informations du jeu -->
+            <!-- Affichées seulement quand la partie a démarré (.Started true). -->
             <div class="game-info {{if not .Started}}hidden{{end}}">
                 <div class="current-player">
                     <span class="label">Joueur actuel :</span>
@@ -49,7 +53,11 @@
                 </div>
             </div>
 
-            <!-- Plateau de jeu -->
+          <!-- Plateau de jeu -->
+          <!-- La grille est rendue côté serveur en utilisant .Board ([][]int).
+              Chaque cellule contient 0=vide, 1=joueur1, 2=joueur2. Le template
+              parcourt les lignes et les colonnes avec range et ajoute la classe
+              player-1 / player-2 pour colorer les pions. -->
             <div class="game-board {{if not .Started}}hidden{{end}}">
                 <table class="board-table">
                     {{range $rowIndex, $row := .Board}}
@@ -57,6 +65,8 @@
                         {{range $colIndex, $col := $row}}
                         <td class="cell {{if eq $col 1}}player-1{{else if eq $col 2}}player-2{{end}}" 
                             data-column="{{$colIndex}}">
+                            <!-- data-column contient l'index de colonne (0-based)
+                                 utilisé par le JS quand l'utilisateur clique sur une case. -->
                             {{if eq $col 1}}
                                     <div class="token"></div>
                                 {{else if eq $col 2}}
@@ -71,7 +81,9 @@
                 </table>
             </div>
 
-            <!-- Actions secondaires (sans boutons de colonnes) -->
+          <!-- Actions secondaires (sans boutons de colonnes) -->
+          <!-- Boutons pour quitter/recommencer. Les formulaires POST appellent
+              /reset ou /quit côté serveur. -->
             <div class="action-buttons {{if not .Started}}hidden{{end}}">
                 <a href="/" class="btn btn-secondary">Actualiser</a>
                 <form action="/quit" method="POST" style="display: inline;">
@@ -83,6 +95,7 @@
             </div>
 
             <!-- Informations des joueurs -->
+            <!-- Affiche le nom et le jeton de chaque joueur (purement visuel). -->
             <div class="players-info {{if not .Started}}hidden{{end}}">
                 <div class="player-info player-1">
                     <div class="player-token">●</div>
@@ -94,9 +107,10 @@
                 </div>
             </div>
 
-            <!-- Notification de fin de partie (remplace le bandeau en bas) -->
-            <!-- Utilise les attributs data-* pour que le JS puisse décider d'afficher
-                 la notification après le rendu côté serveur. -->
+          <!-- Notification de fin de partie (remplace le bandeau en bas) -->
+          <!-- Utilise les attributs data-* pour que le JS puisse décider d'afficher
+              la notification après le rendu côté serveur. Les attributs fournis :
+              data-gameover (bool), data-winner (0=no one, 1 or 2), data-message. -->
             <div id="game-notification" class="notification hidden" role="dialog" aria-live="assertive"
                  data-gameover="{{.GameOver}}" data-winner="{{.Winner}}" data-message="{{.Message}}">
                 <div class="notification-content">
@@ -121,6 +135,10 @@
     </div>
     <script>
         // Clique sur une cellule pour jouer dans la colonne correspondante
+        // Comportement : quand l'utilisateur clique sur une cellule, on crée
+        // dynamiquement un formulaire POST avec le champ 'column' et on l'envoie
+        // à /play. Le serveur attend des colonnes numérotées de 1 à N, donc
+        // on envoie parseInt(column)+1 (data-column est 0-based).
         document.querySelectorAll('.board-table td').forEach(cell => {
             cell.addEventListener('click', () => {
                 const column = cell.dataset.column;
@@ -134,7 +152,8 @@
                 const input = document.createElement('input');
                 input.type = 'hidden';
                 input.name = 'column';
-                input.value = parseInt(column) + 1; // colonnes 1 à 7
+                // data-column commence à 0 => +1 pour correspondre au serveur.
+                input.value = parseInt(column) + 1; // colonnes 1 à N (selon variante)
                 form.appendChild(input);
 
                 document.body.appendChild(form);
@@ -142,7 +161,9 @@
             });
         });
 
-        // Effet de survol (highlight de la colonne)
+    // Effet de survol (highlight de la colonne)
+    // Le code ajoute/enlève la classe .highlight sur toutes les cellules
+    // d'une même colonne pour donner un retour visuel lors du hover.
         document.querySelectorAll('.board-table td').forEach(cell => {
             cell.addEventListener('mouseenter', () => {
                 const column = cell.dataset.column;
@@ -158,6 +179,8 @@
     </script>
     <script>
         // Notification de fin de partie : affiche un modal/toast si data-gameover vaut true
+        // Le modal lit les data-* du DOM (rendus côté serveur) pour savoir si
+        // la partie est terminée et afficher le bon message (victoire / match nul).
         (function() {
             const notif = document.getElementById('game-notification');
             if (!notif) return;

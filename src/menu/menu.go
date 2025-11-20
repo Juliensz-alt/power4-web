@@ -10,7 +10,12 @@ import (
 	"time"
 )
 
-// GameState représente l'état du jeu
+// GameState représente l'état complet d'une partie.
+// Champs principaux :
+//  - Board : grille dynamique (rows x cols) contenant 0=vide,1=j1,2=j2
+//  - Rows/Cols : dimensions de la grille (supporte variantes 4 et 5)
+//  - ConnectN : nombre de jetons alignés nécessaires pour gagner (4 ou 5)
+//  - CurrentPlayer, Winner, GameOver, Message, Started, Mode : état courant et métadonnées
 type GameState struct {
 	Board         [][]int `json:"board"`
 	Rows          int     `json:"rows"`
@@ -24,7 +29,8 @@ type GameState struct {
 	Mode          string  `json:"mode"` // "duo" or "bot"
 }
 
-// GameData pour les templates
+// GameData est la structure envoyée aux templates HTML.
+// Elle embed GameState et ajoute des informations d'affichage (noms, version CSS).
 type GameData struct {
 	GameState
 	Player1Name string
@@ -40,6 +46,9 @@ func newBoard(rows, cols int) [][]int {
 	return b
 }
 
+// game est l'état global (simple, mono-utilisateur pour cette application).
+// Pour une vraie application multi-utilisateurs il faudrait isoler cet état par session
+// ou par identifiant de partie et protéger les accès concurrents.
 var game = &GameState{
 	Rows:          6,
 	Cols:          7,
@@ -53,10 +62,12 @@ var game = &GameState{
 	Mode:          "",
 }
 
-// mutex pour protéger l'accès concurrent à game (pour le bot async)
-// (no mutex needed for synchronous bot updates)
+// Note: si on rend le bot asynchrone ou qu'on gère plusieurs parties, ajouter
+// un mutex ou une gestion par session pour protéger l'accès à `game`.
 
-// SetupRoutes enregistre les handlers HTTP
+// SetupRoutes enregistre toutes les routes HTTP du serveur.
+// Chaque handler mappe une URL (GET/POST) vers une fonction qui rend un template
+// ou met à jour l'état du jeu.
 func SetupRoutes() {
 	// Serve the `static` folder at /static/ so templates can request /static/styles.css
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
@@ -65,16 +76,18 @@ func SetupRoutes() {
 	http.HandleFunc("/reset", resetHandler)
 	http.HandleFunc("/start", startHandler)
 	http.HandleFunc("/quit", quitHandler)
-	// Nouvelle routes: règles et page vide
+	// Pages utilitaires
 	http.HandleFunc("/rules", rulesHandler)
 	http.HandleFunc("/blank", blankHandler)
 	http.HandleFunc("/variant", variantHandler)
-	// Mode selection: duo or bot
+	// Sélection du mode (duo/bot)
 	http.HandleFunc("/game-mode", gameModeHandler)
 	http.HandleFunc("/start-bot", startBotHandler)
 }
 
 // variantHandler affiche la page qui permet de choisir la variante (4 ou 5)
+// Méthode : GET
+// Rend le template `templates/variant.html` et fournit CSSVersion pour le cache-busting.
 func variantHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
@@ -98,9 +111,12 @@ func variantHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// StartServer démarre le serveur HTTP
+// StartServer démarre le serveur HTTP en écoutant sur le port configuré.
+// - Lit la variable d'environnement PORT (fallback 5000)
+// - Initialise le seed du générateur aléatoire utilisé par le bot
+// - Démarre ListenAndServe
 func StartServer() {
-	// Lire le port depuis la variable d'environnement PORT (par défaut 3000)
+	// Lire le port depuis la variable d'environnement PORT (par défaut 5000)
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "5000"
@@ -113,6 +129,9 @@ func StartServer() {
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
+// homeHandler sert la page principale, construit le template.FuncMap utilisé
+// pour les itérations dans le template et fournit les données GameData.
+// Méthode : GET
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
@@ -155,6 +174,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // rulesHandler affiche une page contenant les règles du jeu
+// Méthode : GET, rend `templates/rules.html`.
 func rulesHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
@@ -179,6 +199,7 @@ func rulesHandler(w http.ResponseWriter, r *http.Request) {
 
 
 // blankHandler affiche une page pour l'instant vide (placeholder)
+// Méthode : GET, rend `templates/blank.html`.
 func blankHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
@@ -200,6 +221,13 @@ func blankHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// playHandler traite un POST /play avec le numéro de colonne sélectionné.
+// Étapes principales :
+//  - validation de la méthode et que la partie ait démarré
+//  - vérifier que la colonne est valide et non pleine
+//  - placer le jeton du joueur courant
+//  - vérifier victoire / match nul
+//  - basculer le joueur, et si mode bot, effectuer le coup du bot
 func playHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
@@ -270,12 +298,13 @@ func playHandler(w http.ResponseWriter, r *http.Request) {
 	game.CurrentPlayer = 3 - game.CurrentPlayer
 	game.Message = "Joueur " + strconv.Itoa(game.CurrentPlayer) + ", choisissez une colonne !"
 
-	// Si mode bot et c'est au tour du bot (joueur 2), le bot joue immédiatement (synchrones)
+	// Si mode bot et c'est au tour du bot (joueur 2)
 	if game.Mode == "bot" && game.CurrentPlayer == 2 && !game.GameOver {
 		// choisir une colonne aléatoire parmi celles qui ne sont pas pleines
 		available := make([]int, 0, game.Cols)
-		for c := 0; c < 7; c++ {
-			if c < game.Cols && game.Board[0][c] == 0 {
+		// Itérer jusqu'à game.Cols (pas une constante 7) pour supporter Puissance-5
+		for c := 0; c < game.Cols; c++ {
+			if game.Board[0][c] == 0 {
 				available = append(available, c)
 			}
 		}
@@ -318,6 +347,8 @@ func playHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
+// checkWin vérifie si placer un jeton en (row,col) pour `player` crée une
+// ligne de `game.ConnectN` jetons. On teste les 4 directions (horiz, vert, 2 diag).
 func checkWin(row, col, player int) bool {
 	// Check directions: horizontal, vertical, diag (NW-SE), diag (NE-SW)
 	// Use game.ConnectN as the needed aligned tokens count.
@@ -355,6 +386,8 @@ func checkWin(row, col, player int) bool {
 	return false
 }
 
+// isBoardFull retourne vrai si la première ligne (top) ne contient que des jetons
+// (aucune colonne disponible), ce qui signifie que la grille est pleine.
 func isBoardFull() bool {
 	for col := 0; col < game.Cols; col++ {
 		if game.Board[0][col] == 0 {
@@ -364,6 +397,8 @@ func isBoardFull() bool {
 	return true
 }
 
+// resetHandler gère POST /reset : réinitialise la grille (même variante)
+// et redirige vers la page principale.
 func resetHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
@@ -374,6 +409,8 @@ func resetHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
+// resetGame remet l'état interne de la partie à zéro tout en conservant
+// la variante (rows/cols/connectN) et l'indication Started si nécessaire.
 func resetGame() {
 	game.Board = newBoard(game.Rows, game.Cols)
 	game.CurrentPlayer = 1
@@ -388,6 +425,7 @@ func resetGame() {
 }
 
 // startHandler démarre une nouvelle partie et quitte le menu
+// Il lit éventuellement le champ form `variant` (4 ou 5) pour configurer la grille.
 func startHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
@@ -420,6 +458,7 @@ func startHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // quitHandler remet le jeu en mode menu (Started = false) et réinitialise l'état
+// Remet la variante par défaut (Puissance 4)
 func quitHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
@@ -442,6 +481,8 @@ func quitHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // gameModeHandler affiche la page qui permet de choisir Duo ou Bot
+// Accepte POST (venant de /variant) pour recevoir la variante choisie
+// et rend `templates/game_mode.html` en lui passant la variante et CSSVersion.
 func gameModeHandler(w http.ResponseWriter, r *http.Request) {
 	// This handler accepts POST from the variant selector with form "variant"
 	// and renders the mode selection page (duo or bot) with that variant.
@@ -483,6 +524,7 @@ func gameModeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // startBotHandler démarre une partie contre le bot (bot = joueur 2)
+// Lit le champ `variant` si présent pour initialiser la taille du plateau.
 func startBotHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
