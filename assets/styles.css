@@ -348,24 +348,20 @@ h1 {
 }
 
 /* Fin de jeu */
-/* NOTE: Le bloc .game-over était utilisé pour afficher un bandeau en bas de page
-   quand la partie se termine. Ce rendu est remplacé par une notification modale.
-   On laisse ces styles commentés/retirés pour éviter l'affichage multiple.
-   Si vous voulez restaurer l'ancien bandeau, récupérez les règles depuis la
-   sauvegarde ou supprimez ce commentaire et remettez la classe dans le template. */
+
 
 /* Notification (modal/toast) pour fin de partie */
 .notification {
-    position: fixed; /* overlay centré */
+    position: fixed; 
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    display: flex; /* centre le contenu */
+    display: flex; 
     align-items: center;
     justify-content: center;
-    background: rgba(0,0,0,0.4); /* fond semi-transparent */
-    z-index: 2000; /* au-dessus de tout */
+    background: rgba(0,0,0,0.4);
+    z-index: 2000; 
     padding: 20px;
 }
 
@@ -414,57 +410,53 @@ h1 {
 
 /* Pied de page */
 footer {
-    text-align: center; /* centre le contenu du footer */
-    color: #718096; /* couleur discrète */
-    font-size: 0.9em; /* petite taille */
-    margin-top: 20px; /* espace au dessus du footer */
+    text-align: center;
+    color: #718096;
+    font-size: 0.9em;
+    margin-top: 20px;
 }
 
 /* Adaptation aux petits écrans */
 @media (max-width: 768px) {
     .container {
-        padding: 20px; /* réduit le padding sur tablettes */
-        margin: 10px; /* léger margin pour respirer */
+        padding: 20px;
+        margin: 10px;
     }
-    
+
     h1 {
-        font-size: 2em; /* titre légèrement réduit */
+        font-size: 2em;
     }
-    
+
     .cell {
-        width: 45px; /* cellules plus petites pour écran medium */
+        width: 45px;
         height: 45px;
     }
-    
+
     .token {
-        font-size: 1.5em; /* jetons réduits */
+        font-size: 1.5em;
     }
-    
-    /* Règles responsives pour les boutons de colonne supprimées (backup présent) */
-    
+
     .action-buttons {
-        flex-direction: column; /* empile verticalement les actions */
-        align-items: center; /* centre les boutons */
+        flex-direction: column;
+        align-items: center;
     }
-    
+
     .players-info {
-        flex-direction: column; /* empile les infos joueur */
-        gap: 15px; /* espace entre lignes */
-        align-items: center; /* centre le contenu */
+        flex-direction: column;
+        gap: 15px;
+        align-items: center;
     }
 }
 
 @media (max-width: 480px) {
     .cell {
-        width: 35px; /* petites cellules pour très petits écrans */
+        width: 35px;
         height: 35px;
     }
-    
+
     .token {
-        font-size: 1.2em; /* jeton encore réduit */
+        font-size: 1.2em;
     }
-    
-    /* Règles responsives pour .column-btn supprimées (backup présent) */
 }
 
 /* Styles spécifiques pour la page des règles (`templates/rules.html`) */
@@ -472,15 +464,15 @@ footer {
     background: linear-gradient(180deg, #ffffff 0%, #fbfcff 100%);
     padding: 22px 26px;
     border-radius: 12px;
-    border-left: 6px solid rgba(76, 81, 191, 0.95); /* accent violet */
+    border-left: 6px solid rgba(76, 81, 191, 0.95); 
     margin-bottom: 30px;
-    line-height: 1.7; /* meilleur interligne pour la lecture */
-    color: #2d3748; /* couleur principale du texte */
+    line-height: 1.7; 
+    color: #2d3748; 
     box-shadow: 0 6px 18px rgba(44, 49, 84, 0.06);
 }
 
 .rules h2 {
-    color: #4c51bf; /* titre violet plus marqué */
+    color: #4c51bf;
     margin-top: 18px;
     margin-bottom: 10px;
     font-size: 1.25em;
@@ -496,28 +488,28 @@ footer {
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #f97316 0%, #ef4444 100%); /* petit point coloré */
+    background: linear-gradient(135deg, #f97316 0%, #ef4444 100%); 
     box-shadow: 0 2px 6px rgba(239, 68, 68, 0.18);
 }
 
 .rules p,
 .rules ul {
-    margin-bottom: 18px; /* espace généreux entre paragraphes/sections */
+    margin-bottom: 18px; 
     font-size: 1.05em;
-    color: #374151; /* teinte légèrement plus sombre pour le texte */
+    color: #374151; 
 }
 
 .rules ul {
-    padding-left: 18px; /* indentation propre pour les listes */
+    padding-left: 18px; 
 }
 
 .rules ul li {
-    margin-bottom: 8px; /* espacement entre items */
+    margin-bottom: 8px; 
     padding-left: 6px;
 }
 
 .rules ul li::marker {
-    color: #4c51bf; /* couleur des puces */
+    color: #4c51bf;
 }
 
 /* Amélioration de lisibilité pour petits écrans */
